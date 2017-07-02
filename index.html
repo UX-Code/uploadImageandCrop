@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/css/materialize.min.css"  media="screen,projection"/>
+      <link type="text/css" rel="stylesheet" href="croppie.css"  media="screen,projection"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </head>
+
+    <body>
+      <div class="container">
+        <div class="row">
+          <div class="col l6">
+            <h4>Subir Imagen</h4>
+
+              <div id="wrap-result"><img src="upload/imgdefault.png"></div>
+              <a class="waves-effect waves-light btn" href="#uploadImage">Cambiar foto</a>
+          </div>
+        </div>
+      </div>
+      
+      <div id="uploadImage" class="modal">
+        <div class="modal-content">
+          <div class="row">
+            <div class="col l4">
+              <div id="wrap-upload" style="width:350px"></div>
+            </div>
+            <div class="col l6">
+                  <input type="file" id="upload">
+                  <button class="btn btn-success upload-result">Recortar Imagen</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/js/materialize.min.js"></script>
+      <script src="croppie.js"></script>
+      <script type="text/javascript">
+      $('.modal').modal({
+         dismissible: true,
+         opacity: .8,
+         startingTop: '5%',
+         endingTop: '5%'
+      });
+
+      $uploadCrop = $('#wrap-upload').croppie({
+          enableExif: true,
+          viewport: {
+              width: 200,
+              height: 200
+          },
+          boundary: {
+              width: 300,
+              height: 300
+          }
+      });
+
+      $('#upload').on('change', function () {
+        var reader = new FileReader();
+          reader.onload = function (e) {
+            $uploadCrop.croppie('bind', {
+              url: e.target.result
+            }).then(function(){
+              console.log('jQuery bind complete');
+            });
+
+          }
+          reader.readAsDataURL(this.files[0]);
+      });
+
+      $('.upload-result').on('click', function (ev) {
+        $uploadCrop.croppie('result', {
+          type: 'canvas',
+          size: 'viewport'
+        }).then(function (resp) {
+
+          $.ajax({
+            url: "destino.php",
+            type: "POST",
+            data: {"image":resp},
+            success: function (data) {
+              html = '<img src="' + resp + '" />';
+              $('.modal').modal('close');
+              $("#wrap-result").html(html);
+
+            }
+          });
+        });
+      });
+
+      </script>
+    </body>
+  </html>
